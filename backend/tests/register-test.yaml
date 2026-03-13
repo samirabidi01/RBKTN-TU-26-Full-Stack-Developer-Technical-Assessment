@@ -1,0 +1,21 @@
+config:
+  target: "http://127.0.0.1:5000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "phase1"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  processor: "./register-test.js"
+
+scenarios:
+  - name: "User Registration Test"
+    flow:
+      - function: "generateUserData"
+      - post:
+          url: "/api/auth/register"
+          json:
+            name: "{{ name }}"
+            email: "{{ email }}"
+            password: "{{ password }}"
