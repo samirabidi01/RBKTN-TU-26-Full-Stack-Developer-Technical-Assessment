@@ -7,11 +7,14 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { useTeam } from "../features/teams/teamHooks";
+import UpdateTaskModal from "../features/tasks/TaskModal";
 import {
   useCreateTask,
   useDeleteTask,
   useTeamTasks,
   useUpdateTaskStatus,
+  useUpdateTask,
+
 } from "../features/tasks/taskHooks";
 import TaskForm from "../features/tasks/TaskForm";
 import { useAuthStore } from "../features/auth/authStore";
@@ -31,6 +34,7 @@ const tabs: Array<{ label: string; value: "all" | TaskStatus }> = [
 function getUserName(user: Task["assignedUser"] | Task["createdBy"]) {
   return user && typeof user === "object" ? user.name : "—";
 }
+
 
 // function getTeamIdFromTask(task: Task) {
 //   return typeof task.teamId === "string" ? task.teamId : task.teamId?._id;
@@ -55,6 +59,9 @@ export default function TeamPage() {
   const members: User[] = team?.members ?? [];
   const tasks = tasksQuery.data ?? [];
 
+  const updateTaskMutation = useUpdateTask();
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const handleCreateTask = async (values: {
     title: string;
     description: string;
@@ -75,6 +82,37 @@ export default function TeamPage() {
 
   const handleDelete = async (taskId: string) => {
     await deleteTaskMutation.mutateAsync(taskId);
+  };
+  const openUpdateModal = (task: Task) => {
+    setEditingTask(task);
+    setIsUpdateModalOpen(true);
+    setShowCreateForm(false);
+  };
+
+  const closeUpdateModal = () => {
+    setEditingTask(null);
+    setIsUpdateModalOpen(false);
+  };
+  const handleUpdateTask = async (values: {
+    title: string;
+    description: string;
+    status: "todo" | "doing" | "done";
+    assignedUser?: string;
+    teamId: string;
+  }) => {
+    if (!editingTask) return;
+
+    await updateTaskMutation.mutateAsync({
+      taskId: editingTask._id,
+      payload: {
+        title: values.title,
+        description: values.description,
+        status: values.status,
+        assignedUser: values.assignedUser,
+      },
+    });
+
+    closeUpdateModal();
   };
 
   const counts = useMemo(() => {
@@ -203,15 +241,15 @@ export default function TeamPage() {
                 type="button"
                 onClick={() => onTabChange(tab.value)}
                 className={`inline-flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-semibold transition ${isActive
-                    ? "border-violet-600 text-violet-600"
-                    : "border-transparent text-slate-500 hover:text-slate-900"
+                  ? "border-violet-600 text-violet-600"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
                   }`}
               >
                 {tab.label}
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs ${isActive
-                      ? "bg-violet-100 text-violet-700"
-                      : "bg-slate-100 text-slate-500"
+                    ? "bg-violet-100 text-violet-700"
+                    : "bg-slate-100 text-slate-500"
                     }`}
                 >
                   {count}
@@ -300,10 +338,10 @@ export default function TeamPage() {
                         <td className="px-6 py-5 align-top">
                           <span
                             className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.status === "todo"
-                                ? "bg-slate-100 text-slate-700"
-                                : task.status === "doing"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-emerald-100 text-emerald-700"
+                              ? "bg-slate-100 text-slate-700"
+                              : task.status === "doing"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-emerald-100 text-emerald-700"
                               }`}
                           >
                             {task.status === "todo"
@@ -341,13 +379,22 @@ export default function TeamPage() {
                             </select>
 
                             {canDelete && (
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(task._id)}
-                                className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                              >
-                                Delete
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => openUpdateModal(task)}
+                                  className="rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(task._id)}
+                                  className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                                >
+                                  Delete
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
@@ -397,6 +444,20 @@ export default function TeamPage() {
           </div>
         )}
       </section>
+      <UpdateTaskModal
+        open={isUpdateModalOpen}
+        task={editingTask}
+        teamId={teamId}
+        members={members}
+        isLoading={updateTaskMutation.isPending}
+        errorMessage={
+          updateTaskMutation.isError
+            ? getErrorMessage(updateTaskMutation.error)
+            : undefined
+        }
+        onClose={closeUpdateModal}
+        onSubmit={handleUpdateTask}
+      />
     </div>
   );
 }
