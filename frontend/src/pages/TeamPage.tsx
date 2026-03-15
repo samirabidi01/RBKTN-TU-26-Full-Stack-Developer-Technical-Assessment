@@ -202,19 +202,17 @@ export default function TeamPage() {
                 key={tab.value}
                 type="button"
                 onClick={() => onTabChange(tab.value)}
-                className={`inline-flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-semibold transition ${
-                  isActive
+                className={`inline-flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-semibold transition ${isActive
                     ? "border-violet-600 text-violet-600"
                     : "border-transparent text-slate-500 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 {tab.label}
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${
-                    isActive
+                  className={`rounded-full px-2 py-0.5 text-xs ${isActive
                       ? "bg-violet-100 text-violet-700"
                       : "bg-slate-100 text-slate-500"
-                  }`}
+                    }`}
                 >
                   {count}
                 </span>
@@ -273,13 +271,15 @@ export default function TeamPage() {
 
                 <tbody>
                   {paginatedTasks.map((task) => {
+                    const currentUserId = user?._id || (user as any)?.id;
+
                     const createdById =
                       task.createdBy && typeof task.createdBy === "object"
-                        ? task.createdBy._id
+                        ? task.createdBy._id || (task.createdBy as any).id
                         : task.createdBy;
 
                     const canDelete =
-                      !!user?._id && createdById === user._id;
+                      !!currentUserId && String(createdById) === String(currentUserId);
 
                     return (
                       <tr
@@ -299,19 +299,18 @@ export default function TeamPage() {
 
                         <td className="px-6 py-5 align-top">
                           <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                              task.status === "todo"
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.status === "todo"
                                 ? "bg-slate-100 text-slate-700"
                                 : task.status === "doing"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-emerald-100 text-emerald-700"
-                            }`}
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-emerald-100 text-emerald-700"
+                              }`}
                           >
                             {task.status === "todo"
                               ? "To Do"
                               : task.status === "doing"
-                              ? "In Progress"
-                              : "Done"}
+                                ? "In Progress"
+                                : "Done"}
                           </span>
                         </td>
 
@@ -332,10 +331,7 @@ export default function TeamPage() {
                             <select
                               value={task.status}
                               onChange={(e) =>
-                                handleStatusChange(
-                                  task._id,
-                                  e.target.value as TaskStatus
-                                )
+                                handleStatusChange(task._id, e.target.value as TaskStatus)
                               }
                               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-violet-400"
                             >
@@ -344,7 +340,7 @@ export default function TeamPage() {
                               <option value="done">done</option>
                             </select>
 
-                            {canDelete ? (
+                            {canDelete && (
                               <button
                                 type="button"
                                 onClick={() => handleDelete(task._id)}
@@ -352,7 +348,7 @@ export default function TeamPage() {
                               >
                                 Delete
                               </button>
-                            ) : null}
+                            )}
                           </div>
                         </td>
                       </tr>
