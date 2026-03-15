@@ -7,6 +7,7 @@ type Props = {
   currentUserId?: string;
   onStatusChange?: (taskId: string, status: TaskStatus) => void;
   onDelete?: (taskId: string) => void;
+  onEdit?: (task: Task) => void;
 };
 
 const statusClassMap: Record<TaskStatus, string> = {
@@ -20,6 +21,7 @@ export default function TaskCard({
   currentUserId,
   onStatusChange,
   onDelete,
+  onEdit,
 }: Props) {
   const assignedUserName =
     task.assignedUser && typeof task.assignedUser === "object"
@@ -32,11 +34,10 @@ export default function TaskCard({
       : task.createdBy;
 
   const teamName =
-    task.teamId && typeof task.teamId === "object"
-      ? task.teamId.name
-      : "Team";
+    task.teamId && typeof task.teamId === "object" ? task.teamId.name : "Team";
 
   const canDelete = !!currentUserId && createdById === currentUserId;
+  const canEdit = !!currentUserId && createdById === currentUserId;
 
   return (
     <Card className="p-4">
@@ -57,7 +58,9 @@ export default function TaskCard({
         </div>
 
         {task.description ? (
-          <p className="line-clamp-2 text-sm text-slate-600">{task.description}</p>
+          <p className="line-clamp-2 text-sm text-slate-600">
+            {task.description}
+          </p>
         ) : null}
 
         <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
@@ -66,7 +69,7 @@ export default function TaskCard({
           <span>{formatDate(task.createdAt)}</span>
         </div>
 
-        {(onStatusChange || canDelete) && (
+        {(onStatusChange || canDelete || canEdit) && (
           <div className="flex flex-wrap items-center gap-3">
             {onStatusChange && (
               <select
@@ -80,6 +83,16 @@ export default function TaskCard({
                 <option value="doing">doing</option>
                 <option value="done">done</option>
               </select>
+            )}
+
+            {canEdit && onEdit && (
+              <button
+                type="button"
+                onClick={() => onEdit(task)}
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Edit
+              </button>
             )}
 
             {canDelete && onDelete && (

@@ -32,9 +32,9 @@ function getUserName(user: Task["assignedUser"] | Task["createdBy"]) {
   return user && typeof user === "object" ? user.name : "—";
 }
 
-function getTeamIdFromTask(task: Task) {
-  return typeof task.teamId === "string" ? task.teamId : task.teamId?._id;
-}
+// function getTeamIdFromTask(task: Task) {
+//   return typeof task.teamId === "string" ? task.teamId : task.teamId?._id;
+// }
 
 export default function TeamPage() {
   const { teamId = "" } = useParams();

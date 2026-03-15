@@ -5,9 +5,10 @@ import {
   getAssignedTasks,
   getTasksByTeam,
   updateTaskStatus,
+  updateTask
 } from "../../api/taskApi";
 import { queryClient } from "../../app/providers";
-import type { CreateTaskInput, UpdateTaskStatusInput } from "./taskTypes";
+import type { CreateTaskInput, UpdateTaskStatusInput,UpdateTaskInput } from "./taskTypes";
 
 export function useAssignedTasks() {
   return useQuery({
@@ -46,6 +47,24 @@ export function useUpdateTaskStatus() {
     onSuccess: (task) => {
       const teamId =
         typeof task.teamId === "string" ? task.teamId : task.teamId._id;
+
+      queryClient.invalidateQueries({ queryKey: ["teamTasks", teamId] });
+      queryClient.invalidateQueries({ queryKey: ["assignedTasks"] });
+    },
+  });
+}
+export function useUpdateTask() {
+  return useMutation({
+    mutationFn: ({
+      taskId,
+      payload,
+    }: {
+      taskId: string;
+      payload: UpdateTaskInput;
+    }) => updateTask(taskId, payload),
+    onSuccess: (task) => {
+      const teamId =
+        typeof task.teamId === "string" ? task.teamId : task.teamId?._id;
 
       queryClient.invalidateQueries({ queryKey: ["teamTasks", teamId] });
       queryClient.invalidateQueries({ queryKey: ["assignedTasks"] });

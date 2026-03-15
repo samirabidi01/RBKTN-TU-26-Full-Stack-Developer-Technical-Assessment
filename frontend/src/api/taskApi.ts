@@ -3,6 +3,8 @@ import type {
   CreateTaskInput,
   Task,
   UpdateTaskStatusInput,
+  UpdateTaskInput,
+
 } from "../features/tasks/taskTypes";
 
 export async function getAssignedTasks() {
@@ -25,6 +27,10 @@ export async function updateTaskStatus(
   payload: UpdateTaskStatusInput
 ) {
   const { data } = await api.patch<Task>(`/tasks/${taskId}/status`, payload);
+  return data;
+}
+export async function updateTask(taskId: string, payload: UpdateTaskInput) {
+  const { data } = await api.patch<Task>(`/tasks/${taskId}`, payload);
   return data;
 }
 

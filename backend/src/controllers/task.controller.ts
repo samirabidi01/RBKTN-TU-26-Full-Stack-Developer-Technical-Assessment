@@ -211,6 +211,108 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+export const updateTask = async (req: AuthRequest, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { title, description, status, assignedUser } = req.body;
+    const currentUserId = req.user?.id;
+    const currentUserRole = req.user?.role;
+
+    if (!currentUserId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (typeof taskId !== "string" || !mongoose.Types.ObjectId.isValid(taskId)) {
+                  return res.status(400).json({
+                    message: "Invalid taskId"
+                  });
+                }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const team = await Team.findById(task.teamId);
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    const isMember = team.members.some(
+      (memberId) => memberId.toString() === currentUserId
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "You are not allowed to update this task",
+      });
+    }
+
+    const isOwner = task.createdBy.toString() === currentUserId;
+    const isAdmin = currentUserRole === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        message: "Only the task creator or admin can edit this task",
+      });
+    }
+
+    if (title !== undefined) {
+      if (!title.trim()) {
+        return res.status(400).json({ message: "Title cannot be empty" });
+      }
+      task.title = title.trim();
+    }
+
+    if (description !== undefined) {
+      task.description = description.trim();
+    }
+
+    if (status !== undefined) {
+      if (!["todo", "doing", "done"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      task.status = status;
+    }
+
+    if (assignedUser !== undefined) {
+      if (assignedUser === null || assignedUser === "") {
+        task.assignedUser = null;
+      } else {
+        if (!mongoose.Types.ObjectId.isValid(assignedUser)) {
+          return res.status(400).json({ message: "Invalid assignedUser id" });
+        }
+
+        const isAssignedUserMember = team.members.some(
+          (memberId) => memberId.toString() === assignedUser
+        );
+
+        if (!isAssignedUserMember) {
+          return res.status(400).json({
+            message: "Assigned user must be a member of the team",
+          });
+        }
+
+        task.assignedUser = new mongoose.Types.ObjectId(assignedUser);
+      }
+    }
+
+    await task.save();
+
+    const updatedTask = await Task.findById(task._id)
+      .populate("assignedUser", "name email")
+      .populate("createdBy", "name email")
+      .populate("teamId", "name");
+
+    return res.status(200).json(updatedTask);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error while updating task",
+    });
+  }
+};
 
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {

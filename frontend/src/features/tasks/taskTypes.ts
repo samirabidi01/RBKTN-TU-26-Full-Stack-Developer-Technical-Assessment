@@ -29,3 +29,10 @@ export type CreateTaskInput = {
 export type UpdateTaskStatusInput = {
   status: TaskStatus;
 };
+
+export type UpdateTaskInput = {
+  title?: string;
+  description?: string;
+  status?: TaskStatus;
+  assignedUser?: string | null;
+};

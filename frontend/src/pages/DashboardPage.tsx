@@ -148,7 +148,7 @@ export default function DashboardPage() {
       <section>
         <h1 className="text-4xl font-bold tracking-tight text-slate-950">
           Welcome back,{" "}
-          <span className="text-violet-600">{user?.name || "there"}</span> 👋
+          <span className="text-violet-600">{user?.name || "there"}</span> 
         </h1>
         <p className="mt-3 text-lg text-slate-500">
           Here's what's happening across your teams.

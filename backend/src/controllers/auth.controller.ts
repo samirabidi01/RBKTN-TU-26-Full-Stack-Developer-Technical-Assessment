@@ -8,7 +8,7 @@ export const register = async (req: Request, res: Response) => {
   try {
         console.log("BODY:", req.body);
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -29,7 +29,8 @@ export const register = async (req: Request, res: Response) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role
     });
 
     const token = generateToken(user._id.toString());

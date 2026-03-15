@@ -27,7 +27,7 @@ export default function Sidebar() {
           <Sparkles size={18} />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-slate-900">TaskFlow</h1>
+          <h1 className="text-lg font-bold text-slate-900">Task-M</h1>
         </div>
       </div>
 
