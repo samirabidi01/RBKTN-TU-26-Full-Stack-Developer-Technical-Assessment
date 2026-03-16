@@ -217,4 +217,58 @@ Your submission will be evaluated based on:
 * User experience
 
 ---
+# Team Task Manager
 
+A full stack **MERN-style** task management application where users can create teams and collaborate on tasks.
+
+This project was built as part of a **Full Stack Developer Technical Assessment**.
+
+## Tech Stack
+
+### Backend
+- Node.js
+- Express.js
+- JWT Authentication
+- npm
+
+### Frontend
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- React Router
+- TanStack Query
+- pnpm
+
+### Database
+- MongoDB
+
+---
+## Installing Dependencies
+# Backend
+
+Go to the backend folder and install dependencies using npm:
+
+cd backend
+npm install
+
+# Frontend
+
+Go to the frontend folder and install dependencies using pnpm:
+
+cd frontend
+pnpm install
+
+## Running the Project
+
+# Run the Backend
+
+From the backend folder:
+
+npm run dev
+
+# Run the Frontend
+
+From the frontend folder:
+
+pnpm dev
